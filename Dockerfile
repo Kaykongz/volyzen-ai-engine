@@ -6,20 +6,20 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# System deps for builds
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
   && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip first (helps with resolving wheels)
 RUN python -m pip install --upgrade pip
 
-# Install Python deps
+# Install everything in requirements.txt first
 COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt \
+ # then install pandas-ta from a tarball (no git needed)
+ && pip install --no-cache-dir https://github.com/twopirllc/pandas-ta/archive/refs/tags/v0.3.14b0.tar.gz
 
-# Copy the app
+# Copy app
 COPY . /app
 
 EXPOSE 8000
