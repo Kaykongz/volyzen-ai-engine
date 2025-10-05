@@ -6,10 +6,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# System deps (for scientific libs)
+# System deps for builds
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    git \
   && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip first (helps with resolving wheels)
+RUN python -m pip install --upgrade pip
 
 # Install Python deps
 COPY requirements.txt /app/requirements.txt
