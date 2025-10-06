@@ -13,14 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN python -m pip install --upgrade pip
 
-# Install everything in requirements.txt first
+# Install deps
 COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt \
- # then install pandas-ta from a tarball (no git needed)
- && pip install --no-cache-dir https://github.com/twopirllc/pandas-ta/archive/refs/tags/v0.3.14b0.tar.gz
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy app
 COPY . /app
 
-EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Bind to Cloud Run's provided $PORT (defaults to 8000 if unset)
+CMD ["sh","-c","uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
