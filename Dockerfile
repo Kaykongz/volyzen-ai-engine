@@ -6,19 +6,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# System deps (kept lean)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    git \
-  && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
-RUN python -m pip install --upgrade pip
+# Python deps
+COPY requirements.txt ./requirements.txt
+RUN python -m pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Install deps
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# App code
+COPY . .
 
-# Copy app
-COPY . /app
-
-# Bind to Cloud Run's provided $PORT (defaults to 8000 if unset)
-CMD ["sh","-c","uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Cloud Run will pass $PORT; fall back to 8080 locally
+ENV PORT=8080
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
